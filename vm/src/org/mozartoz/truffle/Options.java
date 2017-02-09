@@ -17,6 +17,8 @@ public abstract class Options {
 
 	public static final boolean STACKTRACE_ON_INTERRUPT = System.getProperty("oz.stacktrace.on_interrupt") != null;
 
+	public static final String PRINT_NLINKS = System.getProperty("oz.print.nlinks", null);
+
 	private static boolean bool(String property, boolean defaultValue) {
 		return Boolean.valueOf(System.getProperty(property, Boolean.toString(defaultValue)));
 	}
