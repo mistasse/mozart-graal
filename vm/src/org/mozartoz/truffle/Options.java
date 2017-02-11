@@ -20,6 +20,7 @@ public abstract class Options {
 	// Truffle options
 	public static final int TruffleInvalidationReprofileCount = integer("graal.TruffleInvalidationReprofileCount", 3);
 	public static final int TruffleOSRCompilationThreshold = integer("graal.TruffleOSRCompilationThreshold", 100_000);
+	public static final String PRINT_NLINKS = System.getProperty("oz.print.nlinks", null);
 
 	private static boolean bool(String property, boolean defaultValue) {
 		return Boolean.valueOf(System.getProperty(property, Boolean.toString(defaultValue)));

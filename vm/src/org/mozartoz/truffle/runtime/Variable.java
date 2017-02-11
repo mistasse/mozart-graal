@@ -59,13 +59,32 @@ public abstract class Variable {
 		this.value = value;
 	}
 
+	public void unlink() {
+		this.next = null;
+	}
+
+	public Variable getNextAndUnlink() {
+		Variable next = this.next;
+		this.unlink();
+		return next;
+	}
+
+	public void setInternalValueAndUnlink(Object value, Variable from) {
+		assert !isBound();
+		assert !(value instanceof Variable);
+		assert !(this instanceof OzFuture) || from instanceof OzFuture;
+		this.value = value;
+		this.unlink();
+	}
+
 	public void bind(Object value) {
 		setInternalValue(value, this);
 
-		Variable var = next;
+		Variable var = getNextAndUnlink();
 		while (var != this) {
 			var.setInternalValue(value, this);
-			var = var.next;
+			
+			var = var.getNextAndUnlink();
 		}
 	}
 

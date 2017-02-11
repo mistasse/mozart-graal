@@ -19,7 +19,7 @@ public abstract class BindNode extends OzNode {
 	}
 
 	@Child UnifyNode unifyNode;
-	@Child BindVarValueNode bindVarValueNode;
+	@Child AbstractBindVarValueNode bindVarValueNode;
 
 	@CreateCast("left")
 	protected OzNode derefLeft(OzNode var) {
@@ -84,7 +84,7 @@ public abstract class BindNode extends OzNode {
 	private Object bindVarValue(OzVar var, Object value) {
 		if (bindVarValueNode == null) {
 			CompilerDirectives.transferToInterpreter();
-			bindVarValueNode = insert(BindVarValueNode.create());
+			bindVarValueNode = insert(AbstractBindVarValueNode.create());
 		}
 		return bindVarValueNode.executeBindVarValue(var, value);
 	}
