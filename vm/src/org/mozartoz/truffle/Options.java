@@ -14,6 +14,7 @@ public abstract class Options {
 
 	public static final boolean SELF_TAIL_CALLS = bool("oz.tail.selfcalls", true);
 	public static final boolean SELF_TAIL_CALLS_OSR = bool("oz.tail.selfcalls.osr", true);
+	public static final boolean OPTIMIZE_METHOD_CALLS = bool("oz.methods.cache", true);
 
 	public static final boolean STACKTRACE_ON_INTERRUPT = bool("oz.stacktrace.on_interrupt", false);
 
