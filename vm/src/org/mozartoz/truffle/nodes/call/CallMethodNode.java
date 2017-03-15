@@ -98,8 +98,6 @@ public abstract class CallMethodNode extends OzNode {
 	@NodeChildren({ @NodeChild("self"), @NodeChild("lookup"), @NodeChild("args") })
 	public abstract static class MethodDispatchNode extends OzNode {
 
-		@Child MethodLookupNode otherwiseLookupNode = MethodLookupNode.create();
-
 		public static MethodDispatchNode create() {
 			return MethodDispatchNodeGen.create(null, null, null);
 		}
@@ -117,26 +115,26 @@ public abstract class CallMethodNode extends OzNode {
 			return callNode.call(frame, OzArguments.pack(cachedLookup.declarationFrame, arguments));
 		}
 
-		@Specialization(guards = {
-				"lookup == null",
-				"otherwiseLookupNode.executeLookup(self, OTHERWISE) == otherwiseCachedLookup",
-				"otherwiseCachedLookup != null",
-		}, limit = "methodCache(3)")
+		@Specialization(guards = { "lookup == null" })
 		protected Object dispatchCachedOtherwise(VirtualFrame frame, OzObject self, Object lookup, Object message,
-				@Cached("otherwiseLookupNode.executeLookup(self, OTHERWISE)") OzProc otherwiseCachedLookup,
-				@Cached("createDirectCallNode(otherwiseCachedLookup.callTarget)") DirectCallNode callNode) {
-			Object[] arguments = new Object[] { self, OTHERWISE_MESSAGE_FACTORY.newRecord(message) };
-			return callNode.call(frame, OzArguments.pack(otherwiseCachedLookup.declarationFrame, arguments));
+				@Cached("create()") MethodLookupNode otherwiseLookupNode,
+				@Cached("create()") MethodDispatchNode otherwiseDispatchNode) {
+			message = OTHERWISE_MESSAGE_FACTORY.newRecord(message);
+			OzProc otherwiseProc = otherwiseLookupNode.executeLookup(self, OTHERWISE);
+			return otherwiseDispatchNode.executeDispatch(frame, self, otherwiseProc, message);
 		}
 
 		ConditionProfile otherwiseProfile = ConditionProfile.createCountingProfile();
 
 		@Specialization(contains = { "dispatchCached", "dispatchCachedOtherwise" })
 		protected Object dispatchGeneric(VirtualFrame frame, OzObject self, Object lookup, Object message,
+				@Cached("create()") MethodLookupNode otherwiseLookupNode,
+				@Cached("create()") MethodDispatchNode otherwiseDispatchNode,
 				@Cached("create()") IndirectCallNode callNode) {
 			if (otherwiseProfile.profile(lookup == null)) {
 				lookup = otherwiseLookupNode.executeLookup(self, OTHERWISE);
 				message = OTHERWISE_MESSAGE_FACTORY.newRecord(message);
+				return otherwiseDispatchNode.executeDispatch(frame, self, (OzProc) lookup, message);
 			}
 			Object[] arguments = new Object[] { self, message };
 			OzProc proc = (OzProc) lookup;
