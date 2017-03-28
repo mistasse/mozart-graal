@@ -7,6 +7,7 @@ import java.math.BigInteger;
 import org.mozartoz.truffle.nodes.OzNode;
 
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+import com.oracle.truffle.api.ExactMath;
 import com.oracle.truffle.api.dsl.GenerateNodeFactory;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
@@ -86,6 +87,72 @@ public abstract class IntBuiltins {
 		@Specialization
 		protected BigInteger mod(BigInteger a, BigInteger b) {
 			return a.mod(b);
+		}
+
+	}
+
+	@Builtin(name = "or", deref = ALL)
+	@GenerateNodeFactory
+	@NodeChildren({ @NodeChild("left"), @NodeChild("right") })
+	public static abstract class OrNode extends OzNode {
+
+		@Specialization(rewriteOn = ArithmeticException.class)
+		protected long or(long a, long b) {
+			return a | b;
+		}
+
+		@TruffleBoundary
+		@Specialization
+		protected BigInteger or(BigInteger a, BigInteger b) {
+			return a.or(b);
+		}
+
+	}
+
+	@Builtin(name = "xor", deref = ALL)
+	@GenerateNodeFactory
+	@NodeChildren({ @NodeChild("left"), @NodeChild("right") })
+	public static abstract class XorNode extends OzNode {
+
+		@Specialization(rewriteOn = ArithmeticException.class)
+		protected long xor(long a, long b) {
+			return a ^ b;
+		}
+
+		@TruffleBoundary
+		@Specialization
+		protected BigInteger xor(BigInteger a, BigInteger b) {
+			return a.xor(b);
+		}
+
+	}
+
+	@Builtin(name = "l<<", deref = ALL)
+	@GenerateNodeFactory
+	@NodeChildren({ @NodeChild("left"), @NodeChild("right") })
+	public static abstract class LoseLShiftNode extends OzNode {
+
+		@Specialization
+		protected long llshift(long a, long b) {
+			return a << b;
+		}
+
+	}
+
+	@Builtin(name = "<<", deref = ALL)
+	@GenerateNodeFactory
+	@NodeChildren({ @NodeChild("left"), @NodeChild("right") })
+	public static abstract class LShiftNode extends OzNode {
+
+		@Specialization(rewriteOn = ArithmeticException.class)
+		protected long lshift(long a, long b) {
+			return ExactMath.multiplyExact(a, 1 << b);
+		}
+
+		@TruffleBoundary
+		@Specialization
+		protected BigInteger lshift(BigInteger a, long b) {
+			return a.shiftLeft((int) b);
 		}
 
 	}
